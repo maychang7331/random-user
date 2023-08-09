@@ -3,7 +3,7 @@ import All from "../components/All.vue";
 
 const routes = [
   {
-    path: "/all",
+    path: "/",
     name: "all",
     component: All,
   },

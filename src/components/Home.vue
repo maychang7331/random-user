@@ -1,25 +1,18 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import axios from "axios";
+import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
-const users = ref([]);
-const usersPerPage = ref(10);
+import { useUsersStore } from '../store/user.js';
+const { fetchUserData } = useUsersStore();
+const usersStore = useUsersStore();
+const { pageSize } = storeToRefs(usersStore);
+
 const isCardView = ref(true);
 
 // Fetch users from the API on component mount
 onMounted(async () => {
   await fetchUserData();
 });
-
-// Fetch user data
-const fetchUserData = async function (url) {
-  try {
-    const res = await axios.get(`https://randomuser.me/api/?results=3010`);
-    users.value = res.data.results;
-  } catch (err) {
-    console.error(err);
-  }
-};
 
 // Functions to change view
 const setCardView = () => {
@@ -33,10 +26,10 @@ const setListView = () => {
 
 <template lang="pug">
 nav
-	RouterLink(to="/all") All
+	RouterLink(to="/") All
 	RouterLink(to="/favorite") Favorite
 
-select(v-model.number="usersPerPage")
+select(v-model.number="pageSize")
 	option(value=10) 10
 	option(value=30) 30
 	option(value=50) 50
