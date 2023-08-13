@@ -2,10 +2,10 @@
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
-import { useUsersStore } from '../store/user.js';
-const { fetchUserData } = useUsersStore();
-const usersStore = useUsersStore();
-const { pageSize } = storeToRefs(usersStore);
+import { useUserStore } from '../store/UserStore.js';
+const { fetchUserData } = useUserStore();
+const userStore = useUserStore();
+const { state } = storeToRefs(userStore);
 
 const isCardView = ref(true);
 
@@ -29,7 +29,7 @@ nav
 	RouterLink(to="/") All
 	RouterLink(to="/favorite") Favorite
 
-select(v-model.number="pageSize")
+select(v-model.number="state.itemsPerPage")
 	option(value=10) 10
 	option(value=30) 30
 	option(value=50) 50

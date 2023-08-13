@@ -1,12 +1,13 @@
 <script setup>
-import { storeToRefs } from "pinia";
+import { storeToRefs } from 'pinia';
 
-import CardView from "../components/CardView.vue";
-import { useUsersStore } from "../store/user.js";
-const usersStore = useUsersStore();
-const { favoriteUsers } = storeToRefs(usersStore);
+import CardView from '../components/CardView.vue';
+import { useUserStore } from '../store/UserStore.js';
+const userStore = useUserStore();
+const { state } = storeToRefs(userStore);
 </script>
 
 <template lang="pug">
-CardView(v-for="user in favoriteUsers" :key="user.login.uuid" :user="user")
+p FavTabb
+CardView(v-for="user in state.favoriteUsers" :key="user.login.uuid" :user="user")
 </template>

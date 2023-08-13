@@ -2,9 +2,9 @@
 import { storeToRefs } from 'pinia';
 
 import CardView from '../components/CardView.vue';
-import { useUsersStore } from '../store/user.js';
-const usersStore = useUsersStore();
-const { users } = storeToRefs(usersStore);
+import { useUserStore } from '../store/UserStore.js';
+const userStore = useUserStore();
+const { state } = storeToRefs(userStore);
 </script>
 
 <template lang="pug">
@@ -15,5 +15,6 @@ const { users } = storeToRefs(usersStore);
 //-       li {{ user.name.first }} {{ user.name.last }}
 //- li(v-if="{{users.length()}} === 0") Loading...
 //- p {{users}}
-CardView(v-for="user in users" :key="user.login.uuid" :user="user")
+p All Tab !!!
+CardView(v-for="user in state.users" :key="user.login.uuid" :user="user")
 </template>

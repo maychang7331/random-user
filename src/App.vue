@@ -1,9 +1,9 @@
 <script setup>
-import Home from "./components/Home.vue";
+import HomeTest from './components/HomeTest.vue';
 </script>
 
 <template lang="pug">
-Home
+HomeTest
 </template>
 
 <style scoped></style>
