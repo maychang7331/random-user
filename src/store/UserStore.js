@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
@@ -7,15 +7,38 @@ export const useUserStore = defineStore('userStore', () => {
   const state = ref({
     all: [],
     favorites: [],
-    currentPage: 1,
-    itemsPerPage: 10,
+    pagination: {
+      currentTab: 'all',
+      currentPage: 1,
+      itemsPerPage: 10,
+    },
   });
 
+  const init = function () {
+    const storedFavorites =
+      JSON.parse(localStorage.getItem('piniaStateFavorites')) || [];
+    const storedPagination = JSON.parse(
+      localStorage.getItem('piniaStatePagination'),
+    ) || {
+      currentTab: 'all',
+      currentPage: 1,
+      itemsPerPage: 10,
+    };
+    state.value.favorites = storedFavorites;
+    state.value.pagination = storedPagination;
+  };
+  init();
+
   const createUserObject = function (data) {
-    const usersWithIsLiked = data.results.map((user) => ({
-      ...user,
-      isLiked: false,
-    }));
+    const usersWithIsLiked = data.results.map((user) => {
+      const isLiked = state.value.favorites.some(
+        (item) => item.login.uuid === user.login.uuid,
+      );
+      return {
+        ...user,
+        isLiked,
+      };
+    });
     state.value.all = usersWithIsLiked;
   };
 
@@ -55,6 +78,23 @@ export const useUserStore = defineStore('userStore', () => {
       state.value.favorites.splice(index, 1);
     }
   };
+
+  watch(
+    [state.value.favorites],
+    ([favorites]) => {
+      console.log('Fav Save~~~~~');
+      localStorage.setItem('piniaStateFavorites', JSON.stringify(favorites));
+    },
+    { deep: true },
+  );
+
+  watch(
+    [state.value.pagination],
+    ([pagination]) => {
+      localStorage.setItem('piniaStatePagination', JSON.stringify(pagination));
+    },
+    { deep: true },
+  );
 
   return {
     state,
