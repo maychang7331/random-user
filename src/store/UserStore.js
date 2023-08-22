@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
@@ -45,7 +45,7 @@ export const useUserStore = defineStore('userStore', () => {
   const fetchUserData = async function (url) {
     try {
       const res = await axios.get(
-        `https://randomuser.me/api/?results=34&seed=test2`,
+        `https://randomuser.me/api/?results=82&seed=test2`,
         // `http://jsonblob.com/api/1138688680960843776`,
       );
       createUserObject(res.data);
@@ -82,7 +82,6 @@ export const useUserStore = defineStore('userStore', () => {
   watch(
     [state.value.favorites],
     ([favorites]) => {
-      console.log('Fav Save~~~~~');
       localStorage.setItem('piniaStateFavorites', JSON.stringify(favorites));
     },
     { deep: true },

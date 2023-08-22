@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .link:link,
+  .link:visited {
+    @apply inline-block border-b border-violet-500  text-violet-500 no-underline transition-all;
+  }
+
+  .link:hover,
+  .link:active,
+  .link.active {
+    @apply border-b border-violet-900 text-violet-900;
+  }
+}
+
 /* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

@@ -1,4 +1,7 @@
 <script setup>
+import { computed } from 'vue';
+import Button from './Button.vue';
+
 const props = defineProps({
   currentPage: {
     type: Number,
@@ -7,6 +10,28 @@ const props = defineProps({
   totalPages: {
     type: Number,
   },
+});
+
+const renderPages = computed(() => {
+  if (props.currentPage >= props.totalPages - 2)
+    return [
+      1,
+      '...',
+      props.totalPages - 2,
+      props.totalPages - 1,
+      props.totalPages,
+    ];
+  else if (props.currentPage <= 3) return [1, 2, 3, '...', props.totalPages];
+  else
+    return [
+      1,
+      '...',
+      props.currentPage - 1,
+      props.currentPage,
+      props.currentPage + 1,
+      '...',
+      props.totalPages,
+    ];
 });
 
 const emit = defineEmits(['page-change']);
@@ -19,8 +44,12 @@ const goToPage = (newPage) => {
 </script>
 
 <template lang="pug">
-div
-    button(@click="goToPage(currentPage - 1)" :disabled="currentPage === 1") &lt;
-    button(v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{ active: page === currentPage }") {{ page }}
-    button(@click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages") &gt;
+div.flex.gap-x-1.mx-auto.py-6.justify-center
+    Button(@click="goToPage(currentPage - 1)" :disabled="currentPage === 1") &lt;
+    template(v-if="totalPages >=5" v-for="page in renderPages")
+      Button(v-if="typeof page === 'number'" @click="goToPage(page)" :is-active="currentPage === page") {{ page }}
+      span(v-else).flex.items-end.justify-center.w-8.h-8 ...
+    template(v-else)
+      Button(v-for="page in totalPages" :key="page" @click="goToPage(page)" :is-active="page === currentPage") {{ page }}
+    Button(@click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages") &gt;
 </template>
