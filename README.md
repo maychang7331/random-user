@@ -1,6 +1,6 @@
 # Random User
 
-A contact card application build with Vite, uses Vue 3 (Composition API) as framework, featuring the following tech stack:
+A contact card application([Live Demo](https://front-random-user.netlify.app/)) build with Vite, uses Vue 3 (Composition API) as framework, featuring the following tech stack:
 
 - [**Tailwind**](https://tailwindcss.com/) - for CSS styling
 - **Pug** - for simplified HTML sytax
