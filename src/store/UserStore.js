@@ -1,6 +1,13 @@
 import { ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import {
+  API_URL,
+  NUM_OF_DATA,
+  SEED,
+  CURRENT_TAB,
+  ITEMS_PER_PAGE,
+} from '../config.js';
 
 export const useUserStore = defineStore('userStore', () => {
   // reactive ?
@@ -8,21 +15,22 @@ export const useUserStore = defineStore('userStore', () => {
     all: [],
     favorites: [],
     pagination: {
-      currentTab: 'all',
+      currentTab: CURRENT_TAB,
       currentPage: 1,
-      itemsPerPage: 10,
+      itemsPerPage: ITEMS_PER_PAGE,
     },
   });
 
   const init = function () {
+    // init the state with locoal storage
     const storedFavorites =
       JSON.parse(localStorage.getItem('piniaStateFavorites')) || [];
     const storedPagination = JSON.parse(
       localStorage.getItem('piniaStatePagination'),
     ) || {
-      currentTab: 'all',
+      currentTab: CURRENT_TAB,
       currentPage: 1,
-      itemsPerPage: 10,
+      itemsPerPage: ITEMS_PER_PAGE,
     };
     state.value.favorites = storedFavorites;
     state.value.pagination = storedPagination;
@@ -42,15 +50,14 @@ export const useUserStore = defineStore('userStore', () => {
     state.value.all = usersWithIsLiked;
   };
 
-  const fetchUserData = async function (url) {
+  const fetchUserData = async function () {
     try {
       const res = await axios.get(
-        `https://randomuser.me/api/?results=82&seed=test2`,
-        // `http://jsonblob.com/api/1138688680960843776`,
+        `${API_URL}?results=${NUM_OF_DATA}&seed=${SEED}`,
       );
       createUserObject(res.data);
     } catch (err) {
-      console.error(err);
+      throw err;
     }
   };
 

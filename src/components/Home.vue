@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '../store/UserStore.js';
 import CardView from './CardView.vue';
 import Pagination from './Pagination.vue';
-import UserModal from './UserModal.vue';
+import Modal from './Modal.vue';
 const userStore = useUserStore();
 const { fetchUserData, toggleLike } = useUserStore();
 const { state } = storeToRefs(userStore);
@@ -13,14 +13,18 @@ const { state } = storeToRefs(userStore);
 const isCardMode = ref(true);
 const isModalOpen = ref(false);
 const selectedUser = ref(null);
+const errMessage = ref('');
 
-// Fetch users from the API on component mount
 onMounted(async () => {
-  await fetchUserData();
+  try {
+    await fetchUserData();
+  } catch (err) {
+    console.error(`${err}`);
+    errMessage.value = `Error fetching User Data. ${err.response.status}`;
+  }
 });
 
 const paginatedData = computed(() => {
-  // if favorite is empty
   if (!state.value[state.value.pagination.currentTab]) return '';
 
   const start =
@@ -99,14 +103,15 @@ div.h-screen.z-0.mx-auto.px-4.xs_px-8.sm_px-2.lg_px-8
         svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6")
           path(stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5")
   main
-    template(v-if="paginatedData.length === 0")
-      p.text-center.text-gray-500.text-xl.py-8 Click the like button to add favorites!
+    template(v-if="errMessage")
+      p.text-center.font-bold.text-gray-500.text-xl.py-8 {{errMessage}}
     template(v-else)
       ul(:class="isCardMode ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-1'").grid.gap-4
         CardView(v-for="user in paginatedData" :key="user.login.uuid" :user="user" @toggle-like="handleToggleLike(user)" @click="(e) => handleModalOpen(e, user)" :is-card-mode="isCardMode")
-      Pagination(:current-page="state.pagination.currentPage" :total-pages="totalPages" @page-change="handlePageChange")
-
-
+      template(v-if="!paginatedData.length")
+        p.text-center.font-bold.text-gray-500.text-xl.py-8 Click the like button to store favorites !
+      template(v-else)
+        Pagination(:current-page="state.pagination.currentPage" :total-pages="totalPages" @page-change="handlePageChange")
   div(v-if="isModalOpen" @click="handleModalClose" :class="isModalOpen?'fixed top-0 left-0 w-screen h-screen z-10 bg-black/40 backdrop-blur-sm opacity-100 visible transition-all duration-500':'opacity-0 invisible'")
-  UserModal(v-if="isModalOpen" @close-modal="handleModalClose" :user="selectedUser" :is-modal-open="isModalOpen")
+  Modal(v-if="isModalOpen" @close-modal="handleModalClose" :user="selectedUser" :is-modal-open="isModalOpen")
 </template>

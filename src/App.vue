@@ -5,5 +5,3 @@ import Home from './components/Home.vue';
 <template lang="pug">
 Home
 </template>
-
-<style scoped></style>
