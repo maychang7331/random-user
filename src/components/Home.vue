@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from '../store/UserStore.js';
@@ -106,11 +106,13 @@ div.h-screen.z-0.mx-auto.px-4.xs_px-8.sm_px-2.lg_px-8
     template(v-if="errMessage")
       p.text-center.font-bold.text-gray-500.text-xl.py-8 {{errMessage}}
     template(v-else)
-      ul(:class="isCardMode ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-1'").grid.gap-4
-        CardView(v-for="user in paginatedData" :key="user.login.uuid" :user="user" @toggle-like="handleToggleLike(user)" @click="(e) => handleModalOpen(e, user)" :is-card-mode="isCardMode")
-      template(v-if="!paginatedData.length")
+      template(v-if="!paginatedData.length && state.pagination.currentTab === 'all'")
+        p.text-center.font-bold.text-gray-500.text-xl.py-8 Loading ...
+      template(v-else-if="!paginatedData.length && state.pagination.currentTab === 'favorites'")
         p.text-center.font-bold.text-gray-500.text-xl.py-8 Click the like button to store favorites !
       template(v-else)
+        ul(:class="isCardMode ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-1'").grid.gap-4
+          CardView(v-for="user in paginatedData" :key="user.login.uuid" :user="user" @toggle-like="handleToggleLike(user)" @click="(e) => handleModalOpen(e, user)" :is-card-mode="isCardMode")
         Pagination(:current-page="state.pagination.currentPage" :total-pages="totalPages" @page-change="handlePageChange")
   div(v-if="isModalOpen" @click="handleModalClose" :class="isModalOpen?'fixed top-0 left-0 w-screen h-screen z-10 bg-black/40 backdrop-blur-sm opacity-100 visible transition-all duration-500':'opacity-0 invisible'")
   Modal(v-if="isModalOpen" @close-modal="handleModalClose" :user="selectedUser" :is-modal-open="isModalOpen")
