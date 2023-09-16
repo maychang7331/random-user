@@ -7,6 +7,7 @@ import {
   SEED,
   CURRENT_TAB,
   ITEMS_PER_PAGE,
+  IS_CARD_MODE,
 } from '../config.js';
 
 export const useUserStore = defineStore('userStore', () => {
@@ -18,6 +19,7 @@ export const useUserStore = defineStore('userStore', () => {
       currentTab: CURRENT_TAB,
       currentPage: 1,
       itemsPerPage: ITEMS_PER_PAGE,
+      isCardMode: IS_CARD_MODE,
     },
   });
 
@@ -31,6 +33,7 @@ export const useUserStore = defineStore('userStore', () => {
       currentTab: CURRENT_TAB,
       currentPage: 1,
       itemsPerPage: ITEMS_PER_PAGE,
+      isCardMode: IS_CARD_MODE,
     };
     state.value.favorites = storedFavorites;
     state.value.pagination = storedPagination;
@@ -86,6 +89,9 @@ export const useUserStore = defineStore('userStore', () => {
     }
   };
 
+  const setCardMode = () => (state.value.pagination.isCardMode = true);
+  const setListMode = () => (state.value.pagination.isCardMode = false);
+
   watch(
     [state.value.favorites],
     ([favorites]) => {
@@ -106,5 +112,7 @@ export const useUserStore = defineStore('userStore', () => {
     state,
     fetchUserData,
     toggleLike,
+    setCardMode,
+    setListMode,
   };
 });
