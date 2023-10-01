@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import {
@@ -14,7 +14,8 @@ export const useUserStore = defineStore('userStore', () => {
   // reactive ?
   const state = ref({
     all: [],
-    favorites: [],
+    // displayed: [],
+    favorite: [],
     pagination: {
       currentTab: CURRENT_TAB,
       currentPage: 1,
@@ -23,28 +24,9 @@ export const useUserStore = defineStore('userStore', () => {
     },
   });
 
-  const init = function () {
-    // init the state with locoal storage
-    const storedFavorites =
-      JSON.parse(localStorage.getItem('piniaStateFavorites')) || [];
-    const storedPagination = JSON.parse(
-      localStorage.getItem('piniaStatePagination'),
-    ) || {
-      currentTab: CURRENT_TAB,
-      currentPage: 1,
-      itemsPerPage: ITEMS_PER_PAGE,
-      isCardMode: IS_CARD_MODE,
-    };
-    state.value.favorites = storedFavorites;
-    state.value.pagination = storedPagination;
-  };
-  init();
-
   const createUserObject = function (data) {
     const usersWithIsLiked = data.results.map((user) => {
-      const isLiked = state.value.favorites.some(
-        (item) => item.login.uuid === user.login.uuid,
-      );
+      const isLiked = state.value.favorite.some((item) => item.login.uuid === user.login.uuid);
       return {
         ...user,
         isLiked,
@@ -55,47 +37,73 @@ export const useUserStore = defineStore('userStore', () => {
 
   const fetchUserData = async function () {
     try {
-      const res = await axios.get(
-        `${API_URL}?results=${NUM_OF_DATA}&seed=${SEED}`,
-      );
+      const res = await axios.get(`${API_URL}?results=${NUM_OF_DATA}&seed=${SEED}`);
       createUserObject(res.data);
     } catch (err) {
       throw err;
     }
   };
 
+  const init = async function () {
+    // init the state with locoal storage
+    const storedFavorite = JSON.parse(localStorage.getItem('piniaStateFavorite')) || [];
+    const storedPagination = JSON.parse(localStorage.getItem('piniaStatePagination')) || {
+      currentTab: CURRENT_TAB,
+      currentPage: 1,
+      itemsPerPage: ITEMS_PER_PAGE,
+      isCardMode: IS_CARD_MODE,
+    };
+    state.value.favorite = storedFavorite;
+    state.value.pagination = storedPagination;
+    // try {
+    //   console.log('Fetch!!!');
+    //   await fetchUserData();
+    // } catch (err) {
+    //   console.error(`${err}`);
+    //   // errMessage.value = `Error fetching User Data. ${err.response.status}`;
+    // }
+  };
+  init();
+
   const toggleLike = function (user) {
     user.isLiked = !user.isLiked;
 
     if (user.isLiked) {
-      addToFavorites(user);
+      addToFavorite(user);
     } else {
-      removeFromFavorites(user);
+      removeFromFavorite(user);
     }
   };
 
-  const addToFavorites = function (user) {
-    if (!state.value.favorites.includes(user)) {
-      state.value.favorites.push(user);
+  const addToFavorite = function (user) {
+    if (!state.value.favorite.includes(user)) {
+      state.value.favorite.push(user);
     }
   };
 
-  const removeFromFavorites = function (user) {
-    if (state.value.favorites.includes(user)) {
-      const index = state.value.favorites.findIndex(
-        (el) => el.login.uuid === user.login.uuid,
-      );
-      state.value.favorites.splice(index, 1);
+  const removeFromFavorite = function (user) {
+    if (state.value.favorite.includes(user)) {
+      const index = state.value.favorite.findIndex((el) => el.login.uuid === user.login.uuid);
+      state.value.favorite.splice(index, 1);
     }
   };
 
   const setCardMode = () => (state.value.pagination.isCardMode = true);
   const setListMode = () => (state.value.pagination.isCardMode = false);
+  const tabChange = (newTab) => {
+    state.value.pagination.currentTab = newTab;
+    state.value.pagination.currentPage = 1; // Reset page when changing tabs
+  };
+  const pageChange = (newPage) => {
+    state.value.pagination.currentPage = newPage;
+  };
+
+  const itemsPerPageChange = () => (state.value.pagination.currentPage = 1);
 
   watch(
-    [state.value.favorites],
-    ([favorites]) => {
-      localStorage.setItem('piniaStateFavorites', JSON.stringify(favorites));
+    [state.value.favorite],
+    ([favorite]) => {
+      localStorage.setItem('piniaStateFavorite', JSON.stringify(favorite));
     },
     { deep: true },
   );
@@ -114,5 +122,8 @@ export const useUserStore = defineStore('userStore', () => {
     toggleLike,
     setCardMode,
     setListMode,
+    tabChange,
+    pageChange,
+    itemsPerPageChange,
   };
 });

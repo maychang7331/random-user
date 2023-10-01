@@ -14,13 +14,7 @@ const props = defineProps({
 
 const renderPages = computed(() => {
   if (props.currentPage >= props.totalPages - 2)
-    return [
-      1,
-      '...',
-      props.totalPages - 2,
-      props.totalPages - 1,
-      props.totalPages,
-    ];
+    return [1, '...', props.totalPages - 2, props.totalPages - 1, props.totalPages];
   else if (props.currentPage <= 3) return [1, 2, 3, '...', props.totalPages];
   else
     return [
@@ -44,11 +38,11 @@ const goToPage = (newPage) => {
 </script>
 
 <template lang="pug">
-div.flex.gap-x-1.mx-auto.py-6.justify-center
+div(v-if="totalPages" class="flex gap-x-2 mx-auto my-0 justify-center text-lg md:text-2xl")
     Button(@click="goToPage(currentPage - 1)" :disabled="currentPage === 1") &lt;
     template(v-if="totalPages >=5" v-for="page in renderPages")
       Button(v-if="typeof page === 'number'" @click="goToPage(page)" :is-active="currentPage === page") {{ page }}
-      span(v-else).flex.items-end.justify-center.w-8.h-8 ...
+      span(v-else class=" flex items-end justify-center w-8 h-8") ...
     template(v-else)
       Button(v-for="page in totalPages" :key="page" @click="goToPage(page)" :is-active="page === currentPage") {{ page }}
     Button(@click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages") &gt;

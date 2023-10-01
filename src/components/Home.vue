@@ -3,16 +3,41 @@ import { ref, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from '../store/UserStore.js';
-import CardView from './CardView.vue';
+import SvgWrapper from './SvgWrapper.vue';
+import All from './All.vue';
+import Favorite from './Favorite.vue';
 import Pagination from './Pagination.vue';
 import Modal from './Modal.vue';
 const userStore = useUserStore();
-const { fetchUserData, toggleLike, setCardMode, setListMode } = useUserStore();
+const {
+  fetchUserData,
+  toggleLike,
+  setCardMode,
+  setListMode,
+  tabChange,
+  pageChange,
+  itemsPerPageChange,
+} = useUserStore();
 const { state } = storeToRefs(userStore);
 
 const isModalOpen = ref(false);
 const selectedUser = ref(null);
 const errMessage = ref('');
+const cardSvg = {
+  paths: [
+    'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z',
+  ],
+  stroke: 'none',
+};
+
+const listSvg = {
+  paths: [
+    'M5,7h2h12c1.1,0,2-0.9,2-2s-0.9-2-2-2H7H5C3.9,3,3,3.9,3,5S3.9,7,5,7z',
+    'M19,10h-3H5c-1.1,0-2,0.9-2,2s0.9,2,2,2h11h3c1.1,0,2-0.9,2-2S20.1,10,19,10z',
+    'M19,17h-6H5c-1.1,0-2,0.9-2,2s0.9,2,2,2h8h6c1.1,0,2-0.9,2-2S20.1,17,19,17z',
+  ],
+  stroke: 'none',
+};
 
 onMounted(async () => {
   try {
@@ -23,38 +48,16 @@ onMounted(async () => {
   }
 });
 
-const paginatedData = computed(() => {
-  if (!state.value[state.value.pagination.currentTab]) return '';
-
-  const start =
-    (state.value.pagination.currentPage - 1) *
-    state.value.pagination.itemsPerPage; // 0;
-  const end =
-    state.value.pagination.currentPage * state.value.pagination.itemsPerPage; // 9
-  return state.value[state.value.pagination.currentTab].slice(start, end);
-});
-
 const totalPages = computed(() => {
   if (!state.value[state.value.pagination.currentTab]) return 1;
   else
     return Math.ceil(
-      state.value[state.value.pagination.currentTab].length /
-        state.value.pagination.itemsPerPage,
+      state.value[state.value.pagination.currentTab].length / state.value.pagination.itemsPerPage,
     );
 });
 
-const changeTab = function (newCurrentTab) {
-  state.value.pagination.currentTab = newCurrentTab;
-  state.value.pagination.currentPage = 1; // Reset page when changing tabs
-};
-
-const handleItemsPerPageChange = () => (state.value.pagination.currentPage = 1);
-
-const handleSetCardMode = () => setCardMode();
-const handleSetListMode = () => setListMode();
-
 const handlePageChange = (newPage) => {
-  state.value.pagination.currentPage = newPage;
+  pageChange(newPage);
   window.scrollTo({
     top: 0,
     left: 0,
@@ -66,14 +69,7 @@ const handleToggleLike = (user) => {
   toggleLike(user);
 };
 
-const handleModalOpen = (e, user) => {
-  // prevent modalOpen being triggered by like button and email link
-  if (
-    e.target.tagName.toLowerCase() === 'path' ||
-    e.target.tagName.toLowerCase() === 'svg' ||
-    e.target.tagName.toLowerCase() === 'a'
-  )
-    return;
+const handleModalOpen = (user) => {
   isModalOpen.value = true;
   selectedUser.value = user;
 };
@@ -85,34 +81,24 @@ const handleModalClose = () => {
 </script>
 
 <template lang="pug">
-div.h-screen.z-0.mx-auto.px-4.xs_px-8.sm_px-2.lg_px-8
-  header.h-6.flex.items-center.justify-between.mx-2.my-6
-    div.flex.gap-2.font-medium
-      a(href="" @click.prevent="changeTab('all')" :class="state.pagination.currentTab === 'all' && 'active'").link All
-      a(href="" @click.prevent="changeTab('favorites')" :class="state.pagination.currentTab === 'favorites' && 'active'").link Favorite
-    div.flex.gap-2.items-center
-      select(@change="handleItemsPerPageChange" v-model.number="state.pagination.itemsPerPage")
-        option(value=10) 10
-        option(value=30) 30
-        option(value=50) 50
-      button(@click="handleSetCardMode" :class="state.pagination.isCardMode ? 'text-red-600':''")
-        svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6")
-          path(stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z")
-      button(@click="handleSetListMode" :class="state.pagination.isCardMode ? '':'text-red-600'")
-        svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6")
-          path(stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5")
-  main
-    template(v-if="errMessage")
-      p.text-center.font-bold.text-gray-500.text-xl.py-8 {{errMessage}}
-    template(v-else)
-      template(v-if="!paginatedData.length && state.pagination.currentTab === 'all'")
-        p.text-center.font-bold.text-gray-500.text-xl.py-8 Loading ...
-      template(v-else-if="!paginatedData.length && state.pagination.currentTab === 'favorites'")
-        p.text-center.font-bold.text-gray-500.text-xl.py-8 Click the like button to store favorites !
-      template(v-else)
-        ul(:class="state.pagination.isCardMode ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-1'").grid.gap-4
-          CardView(v-for="user in paginatedData" :key="user.login.uuid" :user="user" @toggle-like="handleToggleLike(user)" @click="(e) => handleModalOpen(e, user)" :is-card-mode="state.pagination.isCardMode")
-        Pagination(:current-page="state.pagination.currentPage" :total-pages="totalPages" @page-change="handlePageChange")
-  div(v-if="isModalOpen" @click="handleModalClose" :class="isModalOpen?'fixed top-0 left-0 w-screen h-screen z-10 bg-black/40 backdrop-blur-sm opacity-100 visible transition-all duration-500':'opacity-0 invisible'")
-  Modal(v-if="isModalOpen" @close-modal="handleModalClose" :user="selectedUser" :is-modal-open="isModalOpen")
+header(class="h-16 xs:h-20 sm:h-24 md:h-32 flex items-center justify-between px-4 md:px-8 text-lg sm:text-2xl font-normal")
+  div(class="flex gap-4 text-violet-500 font-semibold")
+    button(@click.prevent="tabChange('all')" :class="`${state.pagination.currentTab === 'all'? 'border-b border-violet-900 text-violet-900': 'border-transparent'} transition-all border-b-2`") All
+    button(@click.prevent="tabChange('favorite')" :class="`${state.pagination.currentTab === 'favorite' ? 'border-b border-violet-900 text-violet-900': 'border-transparent'} transition-all border-b-2`") Favorite
+  div(class="flex gap-2 items-center")
+    select(@change="itemsPerPageChange" v-model.number="state.pagination.itemsPerPage" class="border-1_4 rounded-md focus:outline-0")
+      option(value=10) 10
+      option(value=30) 30
+      option(value=50) 50
+    button(@click="setCardMode" :class="`${(state.pagination.isCardMode===true) ? 'text-violet-400' : 'text-neutral-400' }`")
+      SvgWrapper(:svgIcon="cardSvg" class="w-6 h-6 xs:w-8 xs:h-8 lg:w-8 lg:h-8")
+    button(@click="setListMode" :class="`${(state.pagination.isCardMode===false) ? 'text-violet-400' : 'text-neutral-400' }`")
+      SvgWrapper(:svgIcon="listSvg" class="w-6 h-6 xs:w-8 xs:h-8 lg:w-8 lg:h-8")
+main(class="px-4 xs:px-8 sm:px-4 lg:px-10 pb-10")
+  p(v-if="errMessage" class="text-center text-xl font-bold text-red-600 py-8") {{errMessage}}
+  All(v-if="state.pagination.currentTab === 'all'" @toggle-like="handleToggleLike($event)" @modal-open="handleModalOpen($event)")
+  Favorite(v-else @toggle-like="handleToggleLike($event)" @modal-open="handleModalOpen($event)")
+  Pagination(:current-page="state.pagination.currentPage" :total-pages="totalPages" @page-change="handlePageChange")
+div(v-if="isModalOpen" @click="handleModalClose" :class="isModalOpen?'fixed top-0 left-0 w-screen h-screen z-10 bg-black/40 backdrop-blur-sm opacity-100 visible transition-all duration-500':'opacity-0 invisible'")
+Modal(v-if="isModalOpen" @close-modal="handleModalClose" :user="selectedUser" :is-modal-open="isModalOpen")
 </template>
