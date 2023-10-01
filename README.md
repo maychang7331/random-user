@@ -37,7 +37,8 @@ This application is deployed using [Netlify](https://www.netlify.com/) with the 
    ```
 3. Drag and drop the "dist" folder for deployment
 
-## 🛠️ Setup Environment From Scratch
+## 🔨 Setup Environment From Scratch
+
 If you want to set up your environment from scratch, follow these steps:
 
 1. [Install Tailwind CSS with Vite using Vue](https://tailwindcss.com/docs/guides/vite#vue)
