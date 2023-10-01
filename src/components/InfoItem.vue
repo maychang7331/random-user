@@ -20,5 +20,5 @@ li(class="flex items-center gap-2")
   SvgWrapper(:svgIcon="svgIcon")
   span(v-if="!mail") {{ text }}
   span(v-else)
-    a(:href="'mailto:' + mail" target="_blank" rel="noopener noreferrer") {{text}}
+    a(:href="'mailto:' + mail" target="_blank" rel="noopener noreferrer" class="text-violet-600 underline") {{text}}
 </template>
